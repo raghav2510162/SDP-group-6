@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VeggieTech - {% block title %}Fresh Vegetable Door Delivery{% endblock %}</title>
+  <meta name="description"
+    content="VeggieTech - Farm fresh vegetables delivered to your doorstep. Order online and get same-day delivery.">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+  {% block extra_head %}{% endblock %}
+</head>
+
+<body>
+
+  <header>
+    <h1>VeggieTech - Fresh Vegetable Door Delivery</h1>
+    <p>Farm fresh vegetables delivered to your doorstep</p>
+  </header>
+
+  <nav>
+    <div class="nav-container">
+      <a href="{{ url_for('index') }}" id="nav-home">Home</a>
+      <a href="{{ url_for('order') }}" id="nav-order">Place Order</a>
+      {% if session.get('admin') %}
+      <a href="{{ url_for('admin_dashboard') }}" id="nav-admin"
+        style="background:#1a3a1a; border-radius:4px; padding:4px 10px;">👤 Admin</a>
+      <a href="{{ url_for('logout') }}" id="nav-logout">Logout</a>
+      {% else %}
+      <a href="{{ url_for('login') }}" id="nav-login">Admin Login</a>
+      {% endif %}
+    </div>
+  </nav>
+
+  <!-- Flash messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+  <div class="flash-container">
+    {% for category, message in messages %}
+    <div class="flash flash-{{ category }}">{{ message }}</div>
+    {% endfor %}
+  </div>
+  {% endif %}
+  {% endwith %}
+
+  {% block content %}{% endblock %}
+
+  <footer>
+    <p>Contact us: veggietech@gmail.com | Phone: +91 98765 43210</p>
+    <p>Address: 12, Market Street, Chennai - 600001</p>
+    <p>&copy; 2025 VeggieTech. All rights reserved.</p>
+  </footer>
+
+  {% block scripts %}{% endblock %}
+</body>
+
+</html>

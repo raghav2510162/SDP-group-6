@@ -1,0 +1,8 @@
+Tomato:40:40.00:kg
+Carrot:40:40.00:kg
+Potato:40:30.00:kg
+Onion:40:20.00:kg
+Spinach:50:15.00:bunches
+Capsicum:50:20.00:kg
+Beans:60:20.00:kg
+Cucumber:45:25.00:kg

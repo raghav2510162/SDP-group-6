@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard - VeggieTech{% endblock %}
+
+{% block content %}
+<section>
+  <div class="vt-card">
+    <div class="vt-card-header">
+      <h2>Management Dashboard</h2>
+      <p style="margin: 5px 0 0 0; color: #666;">Welcome, {{ admin }}. Manage inventory and process orders here.</p>
+    </div>
+
+    <h3>Inventory Control</h3>
+    <form action="{{ url_for('update_inventory') }}" method="POST">
+      <table>
+        <thead>
+          <tr>
+            <th>Vegetable</th>
+            <th>Price (Rs)</th>
+            <th>Stock</th>
+            <th>Unit</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for v in inventory %}
+          <tr>
+            <td style="font-weight: 600;">{{ v.name }}</td>
+            <td>
+              <input type="number" name="price_{{ v.raw_name }}" value="{{ v.price }}" style="width: 80px; margin:0;" min="1">
+            </td>
+            <td>
+              <input type="number" name="stock_{{ v.raw_name }}"
+                     value="{% if v.unit == 'kg' %}{{ v.stock }}{% else %}{{ v.stock|int }}{% endif %}"
+                     step="{% if v.unit == 'kg' %}0.25{% else %}1{% endif %}"
+                     style="width: 100px; margin:0;" min="0">
+            </td>
+            <td><span class="badge available">{{ v.unit }}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <div style="text-align: right;">
+        <input type="submit" value="Update Inventory" class="vt-btn">
+      </div>
+    </form>
+  </div>
+
+  <div class="vt-card">
+    <div class="vt-card-header">
+      <h3>Add New Vegetable</h3>
+    </div>
+    <form action="{{ url_for('add_vegetable') }}" method="POST" style="display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
+      <div style="flex: 2; min-width: 200px;">
+        <label>Name:</label><br>
+        <input type="text" name="veg_name" required placeholder="e.g. Broccoli" style="margin:0;">
+      </div>
+      <div style="flex: 1; min-width: 100px;">
+        <label>Price (Rs):</label><br>
+        <input type="number" name="veg_price" required min="1" value="20" style="margin:0;">
+      </div>
+      <div style="flex: 1; min-width: 100px;">
+        <label>Stock:</label><br>
+        <input type="number" name="veg_stock" id="new_veg_stock" step="0.25" value="50" style="margin:0;" required>
+      </div>
+      <div style="flex: 1; min-width: 100px;">
+        <label>Unit:</label><br>
+        <select name="veg_unit" style="margin:0;" required>
+          <option value="kg">kg</option>
+          <option value="bunches">bunches</option>
+          <option value="packs">packs</option>
+        </select>
+      </div>
+      <div style="flex: 1;">
+        <input type="submit" value="Add to Inventory" class="vt-btn" style="width:100%;">
+      </div>
+    </form>
+  </div>
+
+  <div class="vt-card">
+    <div class="vt-card-header">
+      <h3>Pending Customer Orders</h3>
+      <p style="margin: 5px 0 0; color:#666; font-size:0.9em;">Update order status. Customers with an email on file will be notified automatically.</p>
+    </div>
+    {% if orders %}
+    <table>
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>Customer</th>
+          <th>Total</th>
+          <th>Status</th>
+          <th>Update Status & Notify</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for o in orders %}
+        <tr>
+          <td style="font-family: monospace; font-weight: bold; color: #2e7d32;">{{ o.id }}</td>
+          <td>
+            <strong>{{ o.name }}</strong><br>
+            <small>{{ o.phone }}</small>
+          </td>
+          <td>Rs. {{ o.total }}</td>
+          <td>
+            <span class="badge {% if o.status == 'Delivered' %}available{% elif o.status == 'Pending' %}low{% else %}out{% endif %}">
+              {{ o.status }}
+            </span>
+          </td>
+          <td>
+            <form action="{{ url_for('update_status') }}" method="POST" style="display: flex; flex-direction: column; gap: 5px; margin:0;">
+              <input type="hidden" name="order_id" value="{{ o.id }}">
+              <input type="hidden" name="cust_email" value="{{ o.email }}">
+              {% if o.email %}
+              <span style="font-size: 0.8em; color: #2e7d32;">📧 {{ o.email }}</span>
+              {% else %}
+              <span style="font-size: 0.8em; color: #999;">No email</span>
+              {% endif %}
+              <div style="display:flex; gap:5px;">
+                <select name="status" style="padding: 5px; width: 130px; margin:0;">
+                  <option value="Received">Received</option>
+                  <option value="Packed">Packed</option>
+                  <option value="Dispatched">Dispatched</option>
+                  <option value="Delivered">Delivered</option>
+                  <option value="Cancelled">Cancelled</option>
+                </select>
+                <input type="submit" value="Update" style="padding: 5px 10px; font-size: 0.85em;">
+              </div>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p style="text-align: center; color: #999; padding: 20px;">No pending orders found yet.</p>
+    {% endif %}
+  </div>
+
+  <div class="vt-card" style="margin-top: 20px;">
+    <div class="vt-card-header">
+      <h3>Archived Orders</h3>
+      <p style="margin: 5px 0 0; color:#666; font-size:0.9em;">View history of delivered orders. (Cancelled orders are removed from system)</p>
+    </div>
+    {% if archived_orders %}
+    <table>
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>Customer</th>
+          <th>Total</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for o in archived_orders %}
+        <tr style="opacity: 0.8; background: #f9f9f9;">
+          <td style="font-family: monospace; font-weight: bold; color: #666;">{{ o.id }}</td>
+          <td>
+            <strong>{{ o.name }}</strong><br>
+            <small>{{ o.phone }}</small>
+          </td>
+          <td>Rs. {{ o.total }}</td>
+          <td>
+            <span class="badge {% if o.status == 'Delivered' %}available{% else %}out{% endif %}">
+              {{ o.status }}
+            </span>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p style="text-align: center; color: #999; padding: 20px;">No archived orders found.</p>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const unitSelect = document.querySelector('select[name="veg_unit"]');
+  const stockInput = document.getElementById('new_veg_stock');
+  if (unitSelect && stockInput) {
+    unitSelect.addEventListener('change', function() {
+      stockInput.step = (this.value === 'kg') ? '0.25' : '1';
+    });
+  }
+</script>
+{% endblock %}

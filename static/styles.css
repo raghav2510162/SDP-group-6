@@ -1,0 +1,321 @@
+/* 
+  VeggieTech Design System (Rewrite)
+  =====================================
+  Modern Green & White Aesthetics - unchanged from final.
+*/
+
+:root {
+  --primary-green: #2e7d32;
+  --light-green: #e8f5e9;
+  --dark-green: #1b5e20;
+  --accent-green: #4caf50;
+  --bg-color: #f8fff9;
+  --text-dark: #333;
+  --shadow-soft: 0 4px 15px rgba(0, 0, 0, 0.06);
+  --border-radius: 12px;
+}
+
+body {
+  font-family: 'Outfit', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background-color: var(--bg-color);
+  margin: 0;
+  color: var(--text-dark);
+  font-size: 16px;
+}
+
+header {
+  background-color: var(--dark-green);
+  color: white;
+  padding: 40px 20px;
+  text-align: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+header h1 {
+  margin: 0;
+  font-size: 2.5em;
+  letter-spacing: -1px;
+}
+
+header p {
+  margin: 10px 0 0;
+  opacity: 0.9;
+  font-size: 1.1em;
+}
+
+nav {
+  background-color: var(--accent-green);
+  padding: 0;
+  text-align: center;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+nav .nav-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+nav a {
+  display: inline-block;
+  color: white;
+  text-decoration: none;
+  padding: 20px 25px;
+  font-weight: 700;
+  font-size: 1.05em;
+  text-transform: capitalize;
+  letter-spacing: 0.5px;
+  transition: all 0.2s;
+  line-height: 1;
+}
+
+nav a:hover {
+  background-color: var(--primary-green);
+}
+
+section {
+  padding: 40px 10%;
+  margin: 20px auto;
+  max-width: 1300px;
+}
+
+/* Card System */
+.vt-card {
+  background: white;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-soft);
+  padding: 25px;
+  margin-bottom: 25px;
+  border: 1px solid #e0e0e0;
+}
+
+.vt-card-header {
+  background: linear-gradient(135deg, #f8fff8 0%, #e8f5e9 100%);
+  margin: -25px -25px 20px -25px;
+  padding: 15px 25px;
+  border-bottom: 1px solid #c8e6c9;
+  border-top-left-radius: var(--border-radius);
+  border-top-right-radius: var(--border-radius);
+}
+
+.vt-card-header h2 {
+  margin: 0;
+  border-left: none;
+  padding-left: 0;
+  color: var(--dark-green);
+}
+
+h2 {
+  color: var(--primary-green);
+  border-left: 6px solid var(--accent-green);
+  padding-left: 20px;
+  margin-bottom: 25px;
+  font-weight: 700;
+}
+
+/* Tables */
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: 20px 0;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #ddd;
+}
+
+th {
+  background-color: var(--primary-green);
+  color: white;
+  padding: 15px;
+  text-align: left;
+  font-weight: 600;
+}
+
+td {
+  padding: 15px;
+  border-bottom: 1px solid #eee;
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+tr:nth-child(even) {
+  background-color: #fafafa;
+}
+
+tr:hover {
+  background-color: #f5fcf5;
+}
+
+/* Bill specific */
+.order-box {
+  background: linear-gradient(135deg, #fff 0%, #f8fff8 100%);
+  border: 1px solid #c8e6c9;
+  border-left: 6px solid var(--primary-green);
+  border-radius: 8px;
+  padding: 25px;
+  margin-bottom: 30px;
+}
+
+.order-id {
+  font-family: monospace;
+  font-size: 1.4em;
+  font-weight: bold;
+  color: var(--primary-green);
+  margin-top: 0;
+}
+
+.total-row td {
+  background: var(--light-green);
+  font-weight: bold;
+  font-size: 1.1em;
+}
+
+/* Forms */
+input[type="text"],
+input[type="password"],
+input[type="tel"],
+input[type="number"],
+input[type="email"],
+select,
+textarea {
+  padding: 12px;
+  border: 1.5px solid #ddd;
+  border-radius: 6px;
+  margin: 8px 0;
+  width: 100%;
+  box-sizing: border-box;
+  font-size: 1em;
+  transition: border-color 0.2s;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--accent-green);
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+}
+
+input[type="submit"],
+input[type="button"],
+.vt-btn {
+  background-color: var(--primary-green);
+  color: white;
+  padding: 14px 34px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 1.05em;
+  transition: background 0.3s, transform 0.1s;
+}
+
+input[type="submit"]:hover,
+input[type="button"]:hover,
+.vt-btn:hover {
+  background-color: var(--dark-green);
+  transform: translateY(-1px);
+}
+
+/* Status Badges */
+.badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.85em;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.available {
+  background: #e8f5e9;
+  color: var(--primary-green);
+}
+
+.low {
+  background: #fff3e0;
+  color: #ef6c00;
+}
+
+.out {
+  background: #ffebee;
+  color: #c62828;
+}
+
+/* Success/warning colours for standalone text */
+.success {
+  color: #2e7d32;
+}
+
+.warning {
+  color: #e65100;
+}
+
+/* Flash Messages */
+.flash-container {
+  padding: 20px 10%;
+  max-width: 1300px;
+  margin: 0 auto;
+}
+
+.flash {
+  padding: 15px 25px;
+  margin-bottom: 15px;
+  border-radius: 8px;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+
+.flash-success {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border-color: #c8e6c9;
+}
+
+.flash-error {
+  background: #ffebee;
+  color: #c62828;
+  border-color: #ffcdd2;
+}
+
+footer {
+  background-color: var(--dark-green);
+  color: white;
+  text-align: center;
+  padding: 50px 20px;
+  margin-top: 60px;
+}
+
+footer p {
+  margin: 8px 0;
+  opacity: 0.8;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  section {
+    padding: 20px 5%;
+  }
+
+  header h1 {
+    font-size: 1.8em;
+  }
+
+  nav a {
+    padding: 12px 10px;
+    font-size: 0.85em;
+  }
+}
+
+/* Hide browser-native password reveal icons (Edge/IE) */
+input::-ms-reveal,
+input::-ms-clear {
+  display: none !important;
+}

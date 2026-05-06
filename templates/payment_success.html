@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Payment Confirmed - VeggieTech{% endblock %}
+
+{% block content %}
+<section>
+  <h2 class="success">&#10003; Payment Confirmed!</h2>
+  <div class="order-box" style="border-left-color: #ff9800;">
+    <h3>Order Locked</h3>
+    <p>Payment for order <b>{{ data.ORDER_ID }}</b> via <b>{{ data.METHOD | upper }}</b> was successful.</p>
+    <p><b>Timestamp:</b> {{ data.TIMESTAMP }}</p>
+    <p><b>Amount Received:</b> Rs. {{ data.TOTAL }}</p>
+  </div>
+  <p class="flash flash-success">
+    <b>Payment Confirmed!</b> A confirmation email has been sent to your inbox. The vendor has been notified and is preparing your order.
+  </p>
+</section>
+
+<section>
+  <h2>What's Next?</h2>
+  <ol>
+    <li>You will receive an email when your order is <b>Packed</b>.</li>
+    <li>You will receive a <b>Dispatched</b> email with your estimated delivery window.</li>
+    <li>Our delivery partner will reach your address: <b>{{ order_data.ADDRESS }}</b></li>
+    <li>You will receive a final <b>Delivered</b> confirmation email.</li>
+  </ol>
+  <p style="margin-top:30px;">
+    <a href="{{ url_for('index') }}">
+      <input type="button" value="Back to Home">
+    </a>
+  </p>
+</section>
+{% endblock %}

@@ -1,0 +1,277 @@
+{% extends "base.html" %}
+{% block title %}Order Bill - VeggieTech{% endblock %}
+
+{% block content %}
+<section>
+  <h2>Order Summary</h2>
+  <div class="order-box">
+    <p class="order-id">Order ID: {{ data.ORDER_ID }}</p>
+    <p><b>Customer Name:</b> {{ data.NAME }}</p>
+    <p><b>Phone:</b> {{ data.PHONE }}</p>
+    <p><b>Delivery Address:</b> {{ data.ADDRESS }}</p>
+    <p><b>Order Date:</b> {{ data.DATE }}</p>
+    <p><b>Payment Status:</b>
+      <span style="color: {% if data.PAY_STATUS == 'Paid' %}green{% else %}red{% endif %}; font-weight:bold;">
+        {{ data.PAY_STATUS }}
+      </span>
+    </p>
+  </div>
+</section>
+
+<section>
+  <h2>Bill Details</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Vegetable</th>
+        <th>Quantity</th>
+        <th>Price per unit</th>
+        <th>Amount (Rs.)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in data.items_list %}
+      <tr>
+        <td>{{ item.name }}</td>
+        <td>
+          {% if item.unit == 'kg' %}{{ item.qty }}{% else %}{{ item.qty|float|int }}{% endif %}
+          {{ item.unit }}
+        </td>
+        <td>Rs. {{ item.price }}</td>
+        <td>Rs. {{ item.amount }}</td>
+      </tr>
+      {% endfor %}
+      <tr>
+        <td colspan="3" style="text-align:right; font-weight:bold;">Subtotal</td>
+        <td>Rs. {{ data.SUBTOTAL }}</td>
+      </tr>
+      <tr>
+        <td colspan="3" style="text-align:right; font-weight:bold;">Delivery Charge</td>
+        <td>Rs. {{ data.DELIVERY }}</td>
+      </tr>
+      <tr class="total-row">
+        <td colspan="3" style="text-align:right;">Grand Total</td>
+        <td>Rs. {{ data.TOTAL }}</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+{% if data.PAY_STATUS != 'Paid' %}
+<section id="payment-section">
+  <h2>Confirm & Pay</h2>
+  <p>Select your payment method to complete the order. A confirmation email will be sent to you.</p>
+
+  <form action="{{ url_for('payment') }}" method="POST" id="payment-form">
+    <input type="hidden" name="order_id" value="{{ data.ORDER_ID }}">
+    <input type="hidden" name="phone" value="{{ data.PHONE }}">
+
+    <p>
+      <label for="payment_method">Pay via:</label><br>
+      <select id="payment_method" name="payment_method" required onchange="togglePaymentFields()">
+        <option value="upi">UPI</option>
+        <option value="card">Debit / Credit Card</option>
+        <option value="cod">Cash on Delivery</option>
+      </select>
+    </p>
+
+    <!-- UPI -->
+    <div id="method-upi" class="payment-method-fields">
+      <div
+        style="background:#fff; border:2px solid #4caf50; padding:20px; text-align:center; display:inline-block; border-radius:8px;">
+        <p><b>Scan to Pay via UPI</b></p>
+        <img src="{{ url_for('static', filename='upi_qr.png') }}" alt="UPI QR Code" style="width:200px; height:auto;">
+        <p style="font-family:monospace; margin-top:10px;">veggietech@bank</p>
+      </div>
+      <p>
+        <input type="checkbox" id="confirm-upi" required>
+        <label for="confirm-upi">I have completed the payment of <b>Rs. {{ data.TOTAL }}</b>.</label>
+      </p>
+    </div>
+
+    <!-- Card -->
+    <div id="method-card" class="payment-method-fields" style="display:none;">
+      <p>
+        <label for="card_name">Cardholder Name:</label><br>
+        <input type="text" id="card_name" name="card_name" placeholder="Name on card" class="card-input" style="text-transform: uppercase;">
+      </p>
+      <p>
+        <label for="card_number">Card Number: <span id="card_error" style="color:red; font-size: 0.8em; margin-left: 5px;"></span></label><br>
+        <input type="text" id="card_number" name="card_number" placeholder="xxxx-xxxx-xxxx-xxxx" maxlength="19"
+          minlength="19" pattern="(?:[0-9]{4}-){3}[0-9]{4}" class="card-input">
+      </p>
+      <p>
+        <label for="expiry">Expiry Date: <span id="expiry_error" style="color:red; font-size: 0.8em; margin-left: 5px;"></span></label><br>
+        <input type="text" id="expiry" name="expiry" placeholder="MM/YY" maxlength="5" style="width:100px;"
+          class="card-input">
+        <label for="cvv" style="margin-left:20px;">CVV: <span id="cvv_error" style="color:red; font-size: 0.8em; margin-left: 5px;"></span></label>
+        <div style="position: relative; display: inline-block;">
+          <input type="password" id="cvv" name="cvv" placeholder="***" maxlength="3" minlength="3" pattern="[0-9]{3}"
+            style="width:90px; margin:0; padding-right: 35px;" class="card-input">
+          <span id="cvv-peek-icon" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666; display: flex; align-items: center;">
+            <svg id="cvv-eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          </span>
+        </div>
+      </p>
+    </div>
+
+    <!-- COD -->
+    <div id="method-cod" class="payment-method-fields" style="display:none;">
+      <p class="flash flash-success">Cash on Delivery selected. Please pay <b>Rs. {{ data.TOTAL }}</b> to the delivery
+        agent.</p>
+      <p>
+        <input type="checkbox" id="confirm-cod" class="cod-input">
+        <label for="confirm-cod">I confirm my order with COD.</label>
+      </p>
+    </div>
+
+    <div style="display: flex; gap: 15px; margin-top:20px;">
+      <input type="submit" value="Finalize Order & Payment" id="pay-btn">
+      <button type="submit" formaction="{{ url_for('cancel_order') }}" formnovalidate style="background:#d32f2f; color:white; border:none; padding:10px 20px; border-radius:4px; font-weight:600; cursor:pointer;" onmouseover="this.style.background='#c62828'" onmouseout="this.style.background='#d32f2f'">Cancel & Return Home</button>
+    </div>
+    <p><b>Note:</b> Once confirmed, your order will be locked and cannot be modified.</p>
+  </form>
+</section>
+{% else %}
+<section>
+  <h2 class="success">&#10003; Order Locked & Processing</h2>
+  <p>Your payment has been received and the order is locked. You will receive email updates as your order progresses.
+  </p>
+</section>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function togglePaymentFields() {
+    const method = document.getElementById('payment_method').value;
+    document.querySelectorAll('.payment-method-fields').forEach(d => d.style.display = 'none');
+    document.querySelectorAll('.card-input, .cod-input, #confirm-upi').forEach(i => i.required = false);
+    const sel = document.getElementById('method-' + method);
+    if (sel) {
+      sel.style.display = 'block';
+      if (method === 'upi') document.getElementById('confirm-upi').required = true;
+      else if (method === 'card') document.querySelectorAll('.card-input').forEach(i => i.required = true);
+      else if (method === 'cod') document.querySelector('.cod-input').required = true;
+    }
+  }
+
+  window.onload = function () {
+    togglePaymentFields();
+
+    // Card Name auto-caps
+    const cardName = document.getElementById('card_name');
+    if (cardName) {
+      cardName.addEventListener('input', function(e) {
+        this.value = this.value.toUpperCase();
+      });
+    }
+
+    // Auto-format expiry date MM/YY & validate > 05/26
+    const expiryInput = document.getElementById('expiry');
+    const expiryError = document.getElementById('expiry_error');
+    if (expiryInput) {
+      expiryInput.addEventListener('input', function (e) {
+        let val = this.value.replace(/\D/g, '');
+        if (val.length === 1 && parseInt(val[0]) > 1) {
+          val = '0' + val;
+        }
+        if (val.length >= 2) {
+          val = val.substring(0, 2) + '/' + val.substring(2, 4);
+        }
+        this.value = val;
+
+        if (val.length === 5) {
+          let month = parseInt(val.substring(0, 2), 10);
+          let year = parseInt(val.substring(3, 5), 10);
+          if (year < 26 || (year === 26 && month <= 5)) {
+            expiryError.innerText = "Must be after 05/26";
+          } else if (month > 12 || month < 1) {
+            expiryError.innerText = "Invalid month";
+          } else {
+            expiryError.innerText = "";
+          }
+        } else if (val.length > 0) {
+          expiryError.innerText = "Format MM/YY";
+        } else {
+          expiryError.innerText = "";
+        }
+      });
+
+      expiryInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Backspace' && this.value.endsWith('/')) {
+          e.preventDefault();
+          this.value = this.value.slice(0, -2);
+        }
+      });
+    }
+
+    // Auto-format card number with hyphens and exact length
+    const cardInput = document.getElementById('card_number');
+    const cardError = document.getElementById('card_error');
+    if (cardInput) {
+      cardInput.addEventListener('input', function (e) {
+        let val = this.value.replace(/\D/g, '');
+        
+        if (val.length > 0 && val.length < 16) {
+          cardError.innerText = "Must be 16 digits";
+        } else {
+          cardError.innerText = "";
+        }
+
+        let formatted = val.match(/.{1,4}/g);
+        if (formatted) {
+          this.value = formatted.join('-');
+        } else {
+          this.value = '';
+        }
+      });
+
+      cardInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Backspace' && this.value.endsWith('-')) {
+          e.preventDefault();
+          this.value = this.value.slice(0, -2);
+        }
+      });
+    }
+
+    // CVV logic
+    const cvvInput = document.getElementById('cvv');
+    const cvvError = document.getElementById('cvv_error');
+    const peekIcon = document.getElementById('cvv-peek-icon');
+    
+    if (cvvInput) {
+      cvvInput.addEventListener('input', function (e) {
+        let val = this.value.replace(/\D/g, '');
+        if (val.length > 0 && val.length < 3) {
+          cvvError.innerText = "Must be 3 digits";
+        } else {
+          cvvError.innerText = "";
+        }
+        this.value = val;
+      });
+
+      // Show icon on focus/entry
+      cvvInput.addEventListener('focus', () => peekIcon.style.display = 'block');
+      // Hide icon on blur (optional, but keep for clean UI)
+      // cvvInput.addEventListener('blur', () => peekIcon.style.display = 'none');
+    }
+
+    if (peekIcon && cvvInput) {
+      peekIcon.addEventListener('click', function() {
+        const iconSvg = document.getElementById('cvv-eye-icon');
+        if (cvvInput.type === 'password') {
+          cvvInput.type = 'text';
+          iconSvg.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
+        } else {
+          cvvInput.type = 'password';
+          iconSvg.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
+        }
+      });
+    }
+  };
+</script>
+{% endblock %}

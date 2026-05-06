@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% block title %}Place Order - VeggieTech{% endblock %}
+
+{% block content %}
+<section>
+  <div class="vt-card">
+    <div class="vt-card-header">
+      <h2>Secure Checkout</h2>
+      <p style="margin:5px 0 0 0; color: #666;">Provide your details and select fresh produce. A confirmation email will be sent on order placement.</p>
+    </div>
+
+    <form action="{{ url_for('order') }}" method="POST" id="order-form">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <div>
+          <label for="name" style="font-weight: 600;">Full Name:</label>
+          <input type="text" id="name" name="name" placeholder="John Doe" required>
+        </div>
+        <div>
+          <label for="phone" style="font-weight: 600;">Phone Number:</label>
+          <input type="tel" id="phone" name="phone" placeholder="10-digit mobile number" maxlength="10" required pattern="[0-9]{10}">
+        </div>
+      </div>
+      <div style="margin-top: 15px;">
+        <label for="email" style="font-weight: 600;">Email Address <span style="color:#2e7d32;">(for order confirmation)</span>:</label>
+        <input type="email" id="email" name="email" placeholder="you@example.com" required>
+      </div>
+      <div style="margin-top: 15px;">
+        <label for="address" style="font-weight: 600;">Delivery Address:</label>
+        <textarea id="address" name="address" placeholder="Flat No, Building, Street, Area..." required style="height: 80px;"></textarea>
+      </div>
+
+      <h3 style="margin-top: 40px; color: var(--primary-green);">🛒 Select Fresh Vegetables</h3>
+      <p class="flash flash-success" style="padding: 10px; font-size: 0.9em;">
+        <strong>Note:</strong> Minimum order value is Rs. 100/- for delivery.
+      </p>
+
+      <table id="order-table">
+        <thead>
+          <tr>
+            <th>Vegetable</th>
+            <th>Available</th>
+            <th style="width: 140px;">Price per Unit (Rs.)</th>
+            <th style="width: 150px;">Order Qty</th>
+            <th style="width: 120px;">Price</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for veg in inventory %}
+          <tr>
+            <td>
+              <strong>{{ veg.name }}</strong>
+              {% if veg.stock < 10 and veg.stock > 0 %}
+                <br><span class="badge low" style="font-size: 0.6em;">Limited Stock</span>
+              {% endif %}
+            </td>
+            <td>
+              <span class="badge {{ veg.status }}">
+                {% if veg.unit == 'kg' %}{{ veg.stock }}{% else %}{{ veg.stock|int }}{% endif %}
+                {{ veg.unit }}
+              </span>
+              {% if veg.stock == 0 %}<br><small style="color:red;">Restocking soon</small>{% endif %}
+            </td>
+            <td style="text-align: center;">
+              Rs. <span class="unit-price-val">{{ veg.price }}</span>
+            </td>
+            <td>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <input type="number" name="{{ veg.raw_name }}"
+                       class="qty-input" min="0" max="{{ veg.stock }}" value="0"
+                       step="{% if veg.unit == 'kg' %}0.25{% else %}1{% endif %}"
+                       style="margin:0; text-align: center;"
+                       {% if veg.stock == 0 %}disabled{% endif %}>
+                <span style="font-size: 0.8em; color: #999;">{{ veg.unit }}</span>
+              </div>
+            </td>
+            <td style="text-align: right; font-weight: 600; color: var(--primary-green);">
+              Rs. <span class="row-total">0.00</span>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+        <tfoot>
+          <tr style="background: #f1f8f1;">
+            <td colspan="4" style="text-align:right; font-weight: 600;">Order Subtotal:</td>
+            <td style="font-weight: 700; text-align: right;">Rs. <span id="live-subtotal">0</span></td>
+          </tr>
+          <tr style="background: #f1f8f1;">
+            <td colspan="4" style="text-align:right; color: #666;">Delivery Charge:</td>
+            <td style="color: #666; text-align: right;">Rs. <span id="delivery-charge">0</span></td>
+          </tr>
+          <tr class="total-row">
+            <td colspan="4" style="text-align:right;">Estimated Grand Total:</td>
+            <td style="text-align: right;">Rs. <span id="live-total">0</span></td>
+          </tr>
+        </tfoot>
+      </table>
+
+      <div style="margin-top: 30px; display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 20px;">
+        <div style="flex: 1; min-width: 250px;">
+          <!-- Payment section removed, will be selected on the next screen -->
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <input type="reset" value="Clear" onclick="setTimeout(updateTotal, 10)" style="background: #bbb;">
+          <input type="submit" value="Confirm & Place Order" class="vt-btn" id="submit-order">
+        </div>
+      </div>
+    </form>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function updateTotal() {
+    let subtotal = 0;
+    document.querySelectorAll('#order-table tbody tr').forEach(row => {
+      const qtyInput      = row.querySelector('.qty-input');
+      const unitPriceSpan = row.querySelector('.unit-price-val');
+      const rowTotalSpan  = row.querySelector('.row-total');
+      
+      if (qtyInput && unitPriceSpan && rowTotalSpan) {
+        const up = parseFloat(unitPriceSpan.innerText) || 0;
+        const qt = parseFloat(qtyInput.value) || 0;
+        const rowPrice = up * qt;
+        rowTotalSpan.innerText = rowPrice.toFixed(2);
+        subtotal += rowPrice;
+      }
+    });
+    const delivery = subtotal > 0 ? 15 : 0;
+    document.getElementById('live-subtotal').innerText   = subtotal.toFixed(2);
+    document.getElementById('delivery-charge').innerText = delivery.toFixed(2);
+    document.getElementById('live-total').innerText      = (subtotal + delivery).toFixed(2);
+    document.getElementById('live-subtotal').parentElement.style.color =
+      (subtotal < 100 && subtotal > 0) ? '#c62828' : 'inherit';
+  }
+
+  document.querySelectorAll('.qty-input').forEach(i => {
+    i.addEventListener('input',  updateTotal);
+    i.addEventListener('change', updateTotal);
+  });
+
+  document.getElementById('order-form').addEventListener('submit', function(e) {
+    if (parseFloat(document.getElementById('live-subtotal').innerText) < 100) {
+      e.preventDefault();
+      alert('Minimum order value is Rs. 100. Please select more items.');
+    }
+  });
+
+  updateTotal();
+</script>
+{% endblock %}

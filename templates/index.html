@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Home - VeggieTech{% endblock %}
+
+{% block content %}
+<div style="background: linear-gradient(135deg, #f8fff8 0%, #e8f5e9 100%); padding: 40px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+  <h2 style="color: #1b5e20; margin-top: 0; font-size: 2em; letter-spacing: -0.5px; border:none; padding:0;">Nourishing Homes with Nature's Finest</h2>
+  <p style="font-size: 1.15em; line-height: 1.6; color: #333; max-width: 800px;">
+    At <strong>VeggieTech</strong>, we bridge the gap between rural fields and your kitchen table.
+    Order farm-fresh vegetables online and get same-day delivery to your doorstep.
+  </p>
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 30px;">
+    <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #c8e6c9;">
+      <h4 style="margin: 0 0 8px; color: #2e7d32;">🌿 Farm-to-Fork Freshness</h4>
+      <p style="margin: 0; font-size: 0.9em; color: #666;">Sourced daily from local growers.</p>
+    </div>
+    <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #c8e6c9;">
+      <h4 style="margin: 0 0 8px; color: #2e7d32;">📱 Smart Digital Ordering</h4>
+      <p style="margin: 0; font-size: 0.9em; color: #666;">Live bill calculation as you shop.</p>
+    </div>
+    <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #c8e6c9;">
+      <h4 style="margin: 0 0 8px; color: #2e7d32;">📧 Email Notifications</h4>
+      <p style="margin: 0; font-size: 0.9em; color: #666;">Instant emails for order, payment & delivery updates.</p>
+    </div>
+    <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #c8e6c9;">
+      <h4 style="margin: 0 0 8px; color: #2e7d32;">💳 Flexible Payments</h4>
+      <p style="margin: 0; font-size: 0.9em; color: #666;">UPI, Card, or Cash on Delivery.</p>
+    </div>
+  </div>
+</div>
+
+<section>
+  <h2>Today's Available Vegetables</h2>
+  <p>Stock is updated daily. Order before 10 AM for same-day delivery.</p>
+  <table>
+    <thead>
+      <tr>
+        <th>Vegetable</th>
+        <th>Price (per unit)</th>
+        <th>Available Stock</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for veg in inventory %}
+      <tr>
+        <td>{{ veg.name }}</td>
+        <td>Rs. {{ veg.price }}</td>
+        <td>
+          {% if veg.unit == 'kg' %}{{ veg.stock }}{% else %}{{ veg.stock|int }}{% endif %}
+          {{ veg.unit }}
+        </td>
+        <td class="{{ veg.status }}">
+          {% if veg.status == 'available' %}Available
+          {% elif veg.status == 'low' %}Low Stock
+          {% else %}Out of Stock{% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>How to Order</h2>
+  <ol>
+    <li>Go to the <a href="{{ url_for('order') }}">Place Order</a> page</li>
+    <li>Enter your name, phone, email, and delivery address</li>
+    <li>Select vegetables and quantities — see live bill total</li>
+    <li>Submit your order (minimum Rs. 100)</li>
+    <li>Receive an order confirmation email instantly</li>
+    <li>Pay and get a payment confirmation email</li>
+    <li>We email you when your order is packed and out for delivery</li>
+  </ol>
+</section>
+{% endblock %}

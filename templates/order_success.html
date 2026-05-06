@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Order Placed - VeggieTech{% endblock %}
+
+{% block content %}
+<section>
+  <h2 class="success">&#10003; Order Placed Successfully!</h2>
+  <div class="order-box">
+    <p class="order-id">Order ID: {{ data.ORDER_ID }}</p>
+    <p><b>Customer Name:</b> {{ data.NAME }}</p>
+    <p><b>Phone:</b> {{ data.PHONE }}</p>
+    <p><b>Delivery Address:</b> {{ data.ADDRESS }}</p>
+    <p><b>Order Date:</b> {{ data.DATE }}</p>
+  </div>
+  <p class="flash flash-success">
+    Order details saved! Please proceed to payment below to confirm your order and receive your receipt.
+  </p>
+</section>
+
+<section>
+  <h2>Bill Summary</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Vegetable</th>
+        <th>Quantity</th>
+        <th>Price per unit</th>
+        <th>Amount (Rs.)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in data.items_list %}
+      <tr>
+        <td>{{ item.name }}</td>
+        <td>{{ item.qty }} {{ item.unit }}</td>
+        <td>Rs. {{ item.price }}</td>
+        <td>Rs. {{ item.amount }}</td>
+      </tr>
+      {% endfor %}
+      <tr>
+        <td colspan="3" style="text-align:right; font-weight:bold;">Subtotal</td>
+        <td>Rs. {{ data.SUBTOTAL }}</td>
+      </tr>
+      <tr>
+        <td colspan="3" style="text-align:right; font-weight:bold;">Delivery Charge</td>
+        <td>Rs. {{ data.DELIVERY }}</td>
+      </tr>
+      <tr class="total-row">
+        <td colspan="3" style="text-align:right;">Grand Total</td>
+        <td>Rs. {{ data.TOTAL }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div style="margin-top: 20px;">
+    <a href="{{ url_for('bill', order_id=data.ORDER_ID, phone=data.PHONE) }}">
+      <input type="button" value="Proceed to Payment" id="pay-proceed-btn">
+    </a>
+    <form action="{{ url_for('cancel_order') }}" method="POST" style="display:inline-block; margin-left:10px;">
+      <input type="hidden" name="order_id" value="{{ data.ORDER_ID }}">
+      <input type="submit" value="Cancel Order & Return Home" style="background-color: #aaa;">
+    </form>
+</section>
+{% endblock %}
